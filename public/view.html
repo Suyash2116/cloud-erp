@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manufacturing Product Report</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f3f4f6; color: #1f2937; margin: 0; padding: 20px; }
+    .actions { max-width: 800px; margin: 0 auto 20px auto; text-align: right; }
+    .btn-pdf { background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+    .report-card { background: white; max-width: 800px; margin: 0 auto; padding: 40px; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .header { border-bottom: 2px solid #1e3a8a; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { color: #1e3a8a; margin: 0; font-size: 1.5rem; }
+    .section { margin-bottom: 20px; }
+    .section h3 { background: #f1f5f9; padding: 6px 10px; color: #1e3a8a; margin-top: 0; font-size: 1rem; border-left: 4px solid #1e3a8a; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; font-size: 0.9rem; }
+    th { background: #f8fafc; font-weight: 600; width: 30%; }
+    .status-badge { font-weight: bold; color: #059669; }
+  </style>
+</head>
+<body>
+
+  <div class="actions">
+    <button class="btn-pdf" onclick="downloadPDF()">Download Official PDF Report</button>
+  </div>
+
+  <div class="report-card" id="reportContent">
+    <div class="header">
+      <div>
+        <h1>MANUFACTURING TRACEABILITY REPORT</h1>
+        <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.85rem;">Generated via Cloud ERP System</p>
+      </div>
+      <div style="text-align: right;">
+        <span style="font-weight: bold; font-size: 0.9rem;" id="docBatch"></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>1. Raw Material Intake & Source</h3>
+      <table>
+        <tr><th>Batch / Lot Number</th><td id="rBatch"></td></tr>
+        <tr><th>Supplier Name</th><td id="rSupplier"></td></tr>
+        <tr><th>Material Description</th><td id="rMaterial"></td></tr>
+        <tr><th>Quantity Received</th><td id="rQty"></td></tr>
+        <tr><th>Intake Date & Inspector</th><td id="rIntakeMeta"></td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>2. Production & Manufacturing Phase</h3>
+      <table>
+        <tr><th>Finished Product</th><td id="rProduct"></td></tr>
+        <tr><th>Units Produced</th><td id="rUnits"></td></tr>
+        <tr><th>Machine / Line ID</th><td id="rLine"></td></tr>
+        <tr><th>Production Operator</th><td id="rOperator"></td></tr>
+        <tr><th>Process Notes</th><td id="rNotes"></td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>3. Quality Assurance & Inspection</h3>
+      <table>
+        <tr><th>QC Status</th><td class="status-badge" id="rQcStatus"></td></tr>
+        <tr><th>QC Inspector</th><td id="rQcInspector"></td></tr>
+        <tr><th>Remarks</th><td id="rQcRemarks"></td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h3>4. Dispatch & Logistics</h3>
+      <table>
+        <tr><th>Customer / Destination</th><td id="rCustomer"></td></tr>
+        <tr><th>Dispatch Date</th><td id="rDispatchDate"></td></tr>
+        <tr><th>Tracking / Vehicle No.</th><td id="rTracking"></td></tr>
+        <tr><th>Dispatch Officer</th><td id="rDispatchOfficer"></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const encodedData = urlParams.get('data');
+
+    if (encodedData) {
+      try {
+        const jsonString = decodeURIComponent(atob(encodedData));
+        const data = JSON.parse(jsonString);
+
+        document.getElementById('docBatch').innerText = `Batch ID: ${data.b}`;
+        document.getElementById('rBatch').innerText = data.b;
+        document.getElementById('rSupplier').innerText = data.s;
+        document.getElementById('rMaterial').innerText = data.m;
+        document.getElementById('rQty').innerText = data.q;
+        document.getElementById('rIntakeMeta').innerText = `${data.id} (Inspected by: ${data.ii})`;
+
+        document.getElementById('rProduct').innerText = data.p;
+        document.getElementById('rUnits').innerText = data.up;
+        document.getElementById('rLine').innerText = data.l;
+        document.getElementById('rOperator').innerText = data.op;
+        document.getElementById('rNotes').innerText = data.pn || 'N/A';
+
+        document.getElementById('rQcStatus').innerText = data.qc;
+        document.getElementById('rQcInspector').innerText = data.qi;
+        document.getElementById('rQcRemarks').innerText = data.qr || 'N/A';
+
+        document.getElementById('rCustomer').innerText = data.c;
+        document.getElementById('rDispatchDate').innerText = data.dd;
+        document.getElementById('rTracking').innerText = data.t;
+        document.getElementById('rDispatchOfficer').innerText = data.do;
+      } catch (err) {
+        alert('Invalid or corrupted report URL data.');
+      }
+    } else {
+      document.getElementById('reportContent').innerHTML = '<p>No data found in link. Please generate a report from the main dashboard.</p>';
+    }
+
+    function downloadPDF() {
+      const element = document.getElementById('reportContent');
+      const opt = {
+        margin:       10,
+        filename:     `Manufacturing_Report_${Date.now()}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+  </script>
+</body>
+</html>
