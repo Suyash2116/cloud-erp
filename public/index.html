@@ -122,7 +122,8 @@
       const jsonString = JSON.stringify(payload);
       const encodedData = btoa(encodeURIComponent(jsonString));
 
-      const publicUrl = `${window.location.origin}/view?data=${encodedData}`;
+     // AFTER:
+const publicUrl = `${window.location.origin}/view.html?data=${encodedData}`;
 
       const response = await fetch('/api/generate-qr', {
         method: 'POST',
