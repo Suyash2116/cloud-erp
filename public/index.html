@@ -123,7 +123,7 @@
       const encodedData = btoa(encodeURIComponent(jsonString));
 
      // AFTER:
-const publicUrl = `${window.location.origin}/view.html?data=${encodedData}`;
+const publicUrl = `${window.location.origin}/view?data=${encodedData}`;
 
       const response = await fetch('/api/generate-qr', {
         method: 'POST',
